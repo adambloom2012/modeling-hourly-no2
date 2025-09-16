@@ -10,6 +10,6 @@ torchvision
 tqdm
 xarray
 geopandas
-shapely=
+shapely
 xgboost
 sklearn
