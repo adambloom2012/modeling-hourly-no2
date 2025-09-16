@@ -10,6 +10,6 @@
 #BSUB -e logs/err.%J
 
 source ~/.bashrc
-conda activate /usr/local/usrapps/atmoschem/abloom/ml_env_cuml_pred #pred has extra packages
+source /usr/local/usrapps/atmoschem/abloom/venv/bin/activate #pred has extra packages
 
 python satellite_model/training.py --epochs=20 --datadir=/share/atmoschem/abloom/data/eea
