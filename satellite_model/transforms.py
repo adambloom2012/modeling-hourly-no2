@@ -7,6 +7,7 @@ os.environ["VECLIB_MAXIMUM_THREADS"] = "6" # export VECLIB_MAXIMUM_THREADS=4
 os.environ["NUMEXPR_NUM_THREADS"] = "6" # export NUMEXPR_NUM_THREADS=6
 
 import random
+import copy
 import numpy as np
 import torch
 from rasterio.plot import reshape_as_image
@@ -23,7 +24,7 @@ class ChangeBandOrder(object):
         output is of shape (12,120,120) with band order:
         ["B01", "B02", "B03", "B04", "B05", "B06", "B07", "B08", "B8A", "B09", "B11", "B12"] (order in BigEarthNet .npy files)
         """
-        img = sample["img"].copy()
+        img = copy.copy(sample["img"])
         img = np.moveaxis(img, -1, 0)
         reordered_img = np.zeros(img.shape)
         reordered_img[0, :, :] = img[10, :, :]
@@ -53,13 +54,21 @@ class ChangeBandOrder(object):
 
 class ToTensor(object):
     def __call__(self, sample):
-        img = torch.from_numpy(sample["img"].copy())
+        img = copy.copy(torch.from_numpy(sample["img"]))
 
         if sample.get("no2") is not None:
-            no2 = torch.from_numpy(sample["no2"].copy())
+            no2_val = sample["no2"]
+            if isinstance(no2_val, (int, float, np.number)):
+                no2 = torch.tensor(no2_val, dtype=torch.float32)
+            else:
+                no2 = copy.copy(torch.from_numpy(no2_val))
 
         if sample.get("s5p") is not None:
-            s5p = torch.from_numpy(sample["s5p"].copy())
+            s5p_val = sample["s5p"]
+            if isinstance(s5p_val, (int, float, np.number)):
+                s5p = torch.tensor(s5p_val, dtype=torch.float32)
+            else:
+                s5p = copy.copy(torch.from_numpy(s5p_val))
 
         out = {}
         for k,v in sample.items():
@@ -100,16 +109,16 @@ class Normalize(object):
         self.statistics = statistics
 
     def __call__(self, sample):
-        img = reshape_as_image(sample.get("img").copy())
+        img = copy.copy(reshape_as_image(sample.get("img")))
         img = np.moveaxis((img - self.statistics.channel_means) / self.statistics.channel_std, -1, 0)
 
         if sample.get("no2") is not None:
-            no2 = sample.get("no2").copy()
+            no2 = copy.copy(sample.get("no2"))
 #            no2 = np.array((no2 - self.statistics.no2_mean) / self.statistics.no2_std)
             no2 = np.array((no2 - 0) / 1)
 
         if sample.get("s5p") is not None:
-            s5p = sample.get("s5p").copy()
+            s5p = copy.copy(sample.get("s5p"))
             s5p = np.array((s5p - self.statistics.s5p_mean) / self.statistics.s5p_std)
 
         out = {}
@@ -131,12 +140,12 @@ class Normalize(object):
 
 class Randomize():
     def __call__(self, sample):
-        img = sample.get("img").copy()
+        img = copy.copy(sample.get("img"))
 
         s5p_available = False
         if sample.get("s5p") is not None:
             s5p_available = True
-            s5p = sample["s5p"].copy()
+            s5p = copy.copy(sample["s5p"])
 
         if random.random() > 0.5:
             img = np.flip(img, 1)
