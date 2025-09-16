@@ -54,21 +54,31 @@ class ChangeBandOrder(object):
 
 class ToTensor(object):
     def __call__(self, sample):
-        img = copy.copy(torch.from_numpy(sample["img"]))
+        img_array = sample["img"]
+        if not img_array.flags.c_contiguous:
+            img_array = np.ascontiguousarray(img_array)
+        img = torch.from_numpy(img_array)
 
         if sample.get("no2") is not None:
             no2_val = sample["no2"]
             if isinstance(no2_val, (int, float, np.number)):
                 no2 = torch.tensor(no2_val, dtype=torch.float32)
             else:
-                no2 = copy.copy(torch.from_numpy(no2_val))
+                # Ensure contiguous array for numpy arrays
+                if hasattr(no2_val, 'flags') and not no2_val.flags.c_contiguous:
+                    no2_val = np.ascontiguousarray(no2_val)
+                no2 = torch.from_numpy(no2_val)
+
 
         if sample.get("s5p") is not None:
             s5p_val = sample["s5p"]
             if isinstance(s5p_val, (int, float, np.number)):
                 s5p = torch.tensor(s5p_val, dtype=torch.float32)
             else:
-                s5p = copy.copy(torch.from_numpy(s5p_val))
+                # Ensure contiguous array for numpy arrays
+                if hasattr(s5p_val, 'flags') and not s5p_val.flags.c_contiguous:
+                    s5p_val = np.ascontiguousarray(s5p_val)
+                s5p = torch.from_numpy(s5p_val)
 
         out = {}
         for k,v in sample.items():
