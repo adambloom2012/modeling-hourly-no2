@@ -12,4 +12,4 @@
 source ~/.bashrc
 conda activate /usr/local/usrapps/atmoschem/abloom/ml_env_cuml_pred #pred has extra packages
 
-python training.py --epochs=20 --datadir=/share/atmoschem/abloom/data/eea
+python satellite_model/training.py --epochs=20 --datadir=/share/atmoschem/abloom/data/eea
