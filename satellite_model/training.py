@@ -144,7 +144,7 @@ for run in tqdm(range(1, config.runs+1), unit="run"):
         model = get_model(sources, device, config.checkpoint, dropout=dropout_config, heteroscedastic=config.heteroscedastic)
         model.to(device)
         optimizer = optim.Adam(model.parameters(), lr=config.learning_rate, weight_decay=config.weight_decay_lambda)
-        scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', patience=4, factor=0.5, threshold=1e6, min_lr=1e-7, verbose=True)
+        scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', patience=4, factor=0.5, threshold=1e6, min_lr=1e-7)
 
         if config.verbose: print("Start training")
         # train the model

@@ -5,4 +5,5 @@ satellite_model/.ipynb_checkpoints
 satellite_model/mlruns/
 satellite_model/artifacts/
 satellite_model/results/
-
+.python-version
+pyproject.toml
