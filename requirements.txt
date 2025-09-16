@@ -4,7 +4,7 @@ numpy
 pandas
 rasterio
 rioxarray
-scikit_learn
+scikit-learn
 torch
 torchvision
 tqdm
