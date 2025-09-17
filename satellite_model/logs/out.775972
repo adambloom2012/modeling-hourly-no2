@@ -1,0 +1,110 @@
+Initializing mlflow experiment: 2025-09-16-19:29_S2S5P_pretrained_2018_2020
+../data/samples_S2S5P_2018_2020_eea.csv
+/share/atmoschem/abloom/data/eea
+S2S5P
+2018_2020
+../checkpoints/pretrained_resnet50_LUC.model
+cuda:0
+Start loading samples...
+Initializing dataset
+First stations_train: ['STA_ES1258A', 'STA-BETR721', 'STA_PL0134A', 'STA-BETB006', 'STA_ES0588A', 'STA.DE_DENI031', 'STA-BENBT03', 'STA-BETE714', 'STA.DE_DENI074', 'STA.DE_DEBY012']
+Initializing model
+Start training
+Fraction of valid estimates: 1.0
+Epoch: 0, [0.28920148922367395, 7.7574540365571725, 92.1802883276274]
+Fraction of valid estimates: 1.0
+Epoch: 1, [0.21318829760219993, 7.595893108005662, 102.03810009022914]
+Fraction of valid estimates: 1.0
+Epoch: 2, [0.5764797055482545, 5.8607570301849865, 54.924457864331025]
+Fraction of valid estimates: 1.0
+Epoch: 3, [0.6042291872202422, 5.298757339806619, 51.325751363564336]
+Fraction of valid estimates: 1.0
+Epoch: 4, [0.4310983126832927, 6.656341498096784, 73.77832222756317]
+Fraction of valid estimates: 1.0
+Epoch: 5, [0.5999616119056131, 5.55156172445484, 51.87919417048963]
+Fraction of valid estimates: 1.0
+Epoch: 6, [0.5383018048833266, 6.246103065733385, 59.87557950806222]
+Fraction of valid estimates: 0.9983818770226537
+Epoch: 7, [0.6032065778957169, 5.18165712661342, 51.45836900548696]
+Fraction of valid estimates: 1.0
+Epoch: 8, [0.6124719046015219, 5.293900249073807, 50.25679011323807]
+Fraction of valid estimates: 1.0
+Epoch: 9, [0.5308809058640829, 6.247279590049994, 60.83796280075787]
+Fraction of valid estimates: 1.0
+Epoch: 10, [0.5983810296336636, 5.4341535943900885, 52.084172835111076]
+Fraction of valid estimates: 1.0
+Epoch: 11, [0.5955747357177013, 5.442170425863713, 52.44810857552638]
+Fraction of valid estimates: 1.0
+Epoch: 12, [0.5776415106742844, 5.352129678558377, 54.77378853979771]
+Fraction of valid estimates: 1.0
+Epoch: 13, [0.5928769557287505, 5.2031388105071095, 52.797971628776686]
+Fraction of valid estimates: 1.0
+Epoch: 14, [0.5854621591941531, 5.239266340449018, 53.75956351745887]
+Fraction of valid estimates: 1.0
+Epoch: 15, [0.5964191723620632, 5.503348598829365, 52.33859735375035]
+Fraction of valid estimates: 1.0
+Epoch: 16, [0.5580585409664105, 5.69322941001372, 57.31341653087414]
+Fraction of valid estimates: 1.0
+Epoch: 17, [0.6017937929305454, 5.507303288116039, 51.64158678585654]
+Fraction of valid estimates: 1.0
+Epoch: 18, [0.5994707838596259, 5.256410828155607, 51.94284747042265]
+Fraction of valid estimates: 1.0
+Epoch: 19, [0.6091339190727663, 5.260682882373387, 50.68967856729248]
+
+------------------------------------------------------------
+Sender: LSF System <lsfadmin@gpu10>
+Subject: Job 775972: <train_sat> in cluster <Hazel> Exited
+
+Job <train_sat> was submitted from host <login03.hpc.ncsu.edu> by user <abloom> in cluster <Hazel> at Tue Sep 16 19:28:51 2025
+Job was executed on host(s) <2*gpu10>, in queue <gpu>, as user <abloom> in cluster <Hazel> at Tue Sep 16 19:28:52 2025
+</home/abloom> was used as the home directory.
+</rs1/researchers/z/zqu5/abloom/projects/Global-NO2-Estimation/satellite_model> was used as the working directory.
+Started at Tue Sep 16 19:28:52 2025
+Terminated at Tue Sep 16 19:44:36 2025
+Results reported at Tue Sep 16 19:44:36 2025
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+#!/bin/bash
+#BSUB -n 2
+#BSUB -W 24:00
+#BSUB -q gpu
+#BSUB -gpu "num=1:mode=shared:mps=yes"
+#BSUB -R "select[a30 || a10 || l40 || a100 || h100 ]"
+#BSUB -R "rusage[mem=72GB]"
+#BSUB -J train_sat
+#BSUB -o logs/out.%J
+#BSUB -e logs/err.%J
+
+source ~/.bashrc
+source /usr/local/usrapps/atmoschem/abloom/venv/bin/activate #pred has extra packages
+
+python training.py --epochs=20 --datadir=/share/atmoschem/abloom/data/eea
+
+------------------------------------------------------------
+
+Exited with exit code 1.
+
+Resource usage summary:
+
+    CPU time :                                   1030.00 sec.
+    Max Memory :                                 5 GB
+    Average Memory :                             2.53 GB
+    Total Requested Memory :                     72.00 GB
+    Delta Memory :                               67.00 GB
+    Max Swap :                                   -
+    Max Processes :                              8
+    Max Threads :                                31
+    Run time :                                   959 sec.
+    Turnaround time :                            945 sec.
+
+The output (if any) is above this job summary.
+
+
+
+PS:
+
+Read file <logs/err.775972> for stderr output of this job.
+
