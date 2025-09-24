@@ -12,4 +12,4 @@
 source ~/.bashrc
 source /usr/local/usrapps/atmoschem/abloom/venv/bin/activate #pred has extra packages
 
-python satellite_model/training.py --epochs=20 --datadir=/share/atmoschem/abloom/data/eea
+python satellite_model/training.py --epochs=20 --datadir=/share/atmoschem/abloom/data/eea --samples_file="../data/samples_S2S5P_monthly_eea.csv"
