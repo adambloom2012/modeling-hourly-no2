@@ -10,7 +10,6 @@ from tqdm import tqdm
 import pandas as pd
 import numpy as np
 import os
-import netcdf4
 from re import S
 
 os.environ["OMP_NUM_THREADS"] = "6"  # export OMP_NUM_THREADS=4
