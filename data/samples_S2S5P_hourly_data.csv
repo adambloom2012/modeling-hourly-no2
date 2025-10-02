@@ -1,4 +1,4 @@
-idx,date_str,Sample Measurement,Latitude,Longitude,State Code,County Code,Site Num,s5p_path,img_path
+idx,date_str,no2,Latitude,Longitude,State Code,County Code,Site Num,s5p_path,img_path
 0,12-1-14,24.0,34.19925,-118.53276,6,37,1201,tempo/6_37_1201/6_37_1201.netcdf,sentinel-2/6_37_1201/6_37_1201.npy
 1,12-1-15,20.9,34.19925,-118.53276,6,37,1201,tempo/6_37_1201/6_37_1201.netcdf,sentinel-2/6_37_1201/6_37_1201.npy
 2,12-1-16,16.8,34.19925,-118.53276,6,37,1201,tempo/6_37_1201/6_37_1201.netcdf,sentinel-2/6_37_1201/6_37_1201.npy
