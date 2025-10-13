@@ -173,7 +173,8 @@ def load_data(datadir, samples_file, frequency, sources):
                     datestr = sample["date_str"]
                     time_idx = np.where(s5p_dates == datestr)[0]
                     if len(time_idx) == 0:
-                        print("No S5P data for", datestr)
+                        print("No S5P data for", datestr,
+                              "and station", station)
                         continue
                     time_idx = time_idx.item()
                     sample["s5p"] = s5p_data.isel(
