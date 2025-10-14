@@ -159,8 +159,13 @@ def load_data(datadir, samples_file, frequency, sources):
         for station in tqdm(samples_df.AirQualityStation.unique()):
             station_obs = samples_df[samples_df.AirQualityStation == station]
             s5p_path = station_obs.s5p_path.unique().item()
-            s5p_data = xr.open_dataset(os.path.join(
-                datadir, "sentinel-5p", s5p_path)).rio.write_crs(4326)
+            try:
+                s5p_data = xr.open_dataset(os.path.join(
+                    datadir, "sentinel-5p", s5p_path)).rio.write_crs(4326)
+            except FileNotFoundError as e:
+                print(e)
+                print("Skipping station", station)
+                continue
 
             for idx in station_obs.index.values:
                 try:
