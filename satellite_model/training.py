@@ -82,7 +82,8 @@ if config.verbose:
 
 samples, stations = load_data(
     config.datadir, config.samples_file, frequency, sources)
-
+print("Length of samples =", len(samples))
+print("Number of stations =", len(stations))
 if config.heteroscedastic:
     msel = nn.MSELoss()
     loss = PassthroughLoss(msel)
