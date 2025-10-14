@@ -179,9 +179,8 @@ def load_data(datadir, samples_file, frequency, sources):
                     time_idx = time_idx.item()
                     sample["s5p"] = s5p_data.isel(
                         time=time_idx).tropospheric_NO2_column_number_density.values.squeeze()
-                    # if there are any NaNs in the S5P data, skip this sample
-                    if np.isnan(sample["s5p"]).any():
-                        continue
+                    # remove NaN values from S5P data
+                    sample["s5p"] = sample["s5p"][~np.isnan(sample["s5p"])]
 
                 samples.append(sample)
                 stations[sample["AirQualityStation"]] = np.load(
