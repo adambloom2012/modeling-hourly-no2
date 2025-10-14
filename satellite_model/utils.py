@@ -158,7 +158,17 @@ def load_data(datadir, samples_file, frequency, sources):
         # .netcdf file once
         for station in tqdm(samples_df.AirQualityStation.unique()):
             station_obs = samples_df[samples_df.AirQualityStation == station]
-            s5p_path = station_obs.s5p_path.unique().item()
+            try:
+                s5p_path = station_obs.s5p_path.unique().item()
+            except ValueError:
+                print(f"Multiple or no S5P paths found for station {station}")
+                continue
+
+            if not os.path.exists(os.path.join(datadir, "sentinel-5p", s5p_path)):
+                print(
+                    f"S5P path does not exist for station {station}: {s5p_path}")
+                continue
+
             try:
                 s5p_data = xr.open_dataset(os.path.join(
                     datadir, "sentinel-5p", s5p_path)).rio.write_crs(4326)
