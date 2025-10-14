@@ -163,28 +163,33 @@ def load_data(datadir, samples_file, frequency, sources):
                 datadir, "sentinel-5p", s5p_path)).rio.write_crs(4326)
 
             for idx in station_obs.index.values:
-                # select by index value, not position
-                sample = samples_df.loc[idx].to_dict()
-                sample["idx"] = idx
-                if frequency == "2018_2020":
-                    sample["s5p"] = s5p_data.tropospheric_NO2_column_number_density.values.squeeze(
-                    )
-                else:
-                    datestr = sample["date_str"]
-                    time_idx = np.where(s5p_dates == datestr)[0]
-                    if len(time_idx) == 0:
-                        print("No S5P data for", datestr,
-                              "and station", station)
-                        continue
-                    time_idx = time_idx.item()
-                    sample["s5p"] = s5p_data.isel(
-                        time=time_idx).tropospheric_NO2_column_number_density.values.squeeze()
-                    # remove NaN values from S5P data
-                    sample["s5p"] = sample["s5p"][~np.isnan(sample["s5p"])]
+                try:
+                    # select by index value, not position
+                    sample = samples_df.loc[idx].to_dict()
+                    sample["idx"] = idx
+                    if frequency == "2018_2020":
+                        sample["s5p"] = s5p_data.tropospheric_NO2_column_number_density.values.squeeze(
+                        )
+                    else:
+                        datestr = sample["date_str"]
+                        time_idx = np.where(s5p_dates == datestr)[0]
+                        if len(time_idx) == 0:
+                            print("No S5P data for", datestr,
+                                  "and station", station)
+                            continue
+                        time_idx = time_idx.item()
+                        sample["s5p"] = s5p_data.isel(
+                            time=time_idx).tropospheric_NO2_column_number_density.values.squeeze()
+                        # if there are any NaNs in the S5P data, skip this sample
+                        if np.isnan(sample["s5p"]).any():
+                            continue
 
-                samples.append(sample)
-                stations[sample["AirQualityStation"]] = np.load(
-                    os.path.join(datadir, "sentinel-2", sample["img_path"]))
+                    samples.append(sample)
+                    stations[sample["AirQualityStation"]] = np.load(
+                        os.path.join(datadir, "sentinel-2", sample["img_path"]))
+                except Exception as e:
+                    print(f"Error processing sample {idx}: {e}")
+                    continue
 
             s5p_data.close()
 
