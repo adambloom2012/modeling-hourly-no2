@@ -161,6 +161,9 @@ def load_data(datadir, samples_file, frequency, sources):
             s5p_path = station_obs.s5p_path.unique().item()
             s5p_data = xr.open_dataset(os.path.join(
                 datadir, "sentinel-5p", s5p_path)).rio.write_crs(4326)
+            # remove all NaN values from s5p data
+            s5p_data = s5p_data.dropna(
+                dim='time', how='any')
 
             for idx in station_obs.index.values:
                 # select by index value, not position
