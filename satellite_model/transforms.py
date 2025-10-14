@@ -1,18 +1,19 @@
+from rasterio.plot import reshape_as_image
+import torch
+import numpy as np
+import copy
+import random
 import os
 
-os.environ["OMP_NUM_THREADS"] = "6" # export OMP_NUM_THREADS=4
-os.environ["OPENBLAS_NUM_THREADS"] = "6" # export OPENBLAS_NUM_THREADS=4
-os.environ["MKL_NUM_THREADS"] = "6" # export MKL_NUM_THREADS=6
-os.environ["VECLIB_MAXIMUM_THREADS"] = "6" # export VECLIB_MAXIMUM_THREADS=4
-os.environ["NUMEXPR_NUM_THREADS"] = "6" # export NUMEXPR_NUM_THREADS=6
+os.environ["OMP_NUM_THREADS"] = "6"  # export OMP_NUM_THREADS=4
+os.environ["OPENBLAS_NUM_THREADS"] = "6"  # export OPENBLAS_NUM_THREADS=4
+os.environ["MKL_NUM_THREADS"] = "6"  # export MKL_NUM_THREADS=6
+os.environ["VECLIB_MAXIMUM_THREADS"] = "6"  # export VECLIB_MAXIMUM_THREADS=4
+os.environ["NUMEXPR_NUM_THREADS"] = "6"  # export NUMEXPR_NUM_THREADS=6
 
-import random
-import copy
-import numpy as np
-import torch
-from rasterio.plot import reshape_as_image
 
 # define image transforms
+
 class ChangeBandOrder(object):
     def __call__(self, sample):
         """necessary if model was pre-trained on .npy files of BigEarthNet and should be used on other Sentinel-2 images
@@ -44,13 +45,14 @@ class ChangeBandOrder(object):
             reordered_img = reordered_img[:, 40:160, 40:160]
 
         out = {}
-        for k,v in sample.items():
+        for k, v in sample.items():
             if k == "img":
                 out[k] = reordered_img
             else:
                 out[k] = v
 
         return out
+
 
 class ToTensor(object):
     def __call__(self, sample):
@@ -69,7 +71,6 @@ class ToTensor(object):
                     no2_val = np.ascontiguousarray(no2_val)
                 no2 = torch.from_numpy(no2_val)
 
-
         if sample.get("s5p") is not None:
             s5p_val = sample["s5p"]
             if isinstance(s5p_val, (int, float, np.number)):
@@ -81,7 +82,7 @@ class ToTensor(object):
                 s5p = torch.from_numpy(s5p_val)
 
         out = {}
-        for k,v in sample.items():
+        for k, v in sample.items():
             if k == "img":
                 out[k] = img
             elif k == "no2":
@@ -93,15 +94,16 @@ class ToTensor(object):
 
         return out
 
+
 class DatasetStatistics(object):
     def __init__(self):
         self.channel_means = np.array([340.76769064, 429.9430203, 614.21682446,
-                590.23569706, 950.68368468, 1792.46290469, 2075.46795189, 2218.94553375,
-                2266.46036911, 2246.0605464, 1594.42694882, 1009.32729131])
+                                       590.23569706, 950.68368468, 1792.46290469, 2075.46795189, 2218.94553375,
+                                       2266.46036911, 2246.0605464, 1594.42694882, 1009.32729131])
 
         self.channel_std = np.array([554.81258967, 572.41639287, 582.87945694,
-                675.88746967, 729.89827633, 1096.01480586, 1273.45393088, 1365.45589904,
-                1356.13789355, 1302.3292881, 1079.19066363, 818.86747235])
+                                     675.88746967, 729.89827633, 1096.01480586, 1273.45393088, 1365.45589904,
+                                     1356.13789355, 1302.3292881, 1079.19066363, 818.86747235])
 
         # statistics over the whole of Europe from Sentinel-5P products in 2018-2020:
         # l3_mean_europe_2018_2020_005dg.netcdf mean 1.51449095e+15 std 6.93302798e+14
@@ -113,14 +115,20 @@ class DatasetStatistics(object):
         self.no2_mean = 20.95862054085057
         self.no2_std = 11.641219387279973
 
+
 class Normalize(object):
     """normalize a sample, i.e. the image and NO2 value, by subtracting mean and dividing by std"""
+
     def __init__(self, statistics):
         self.statistics = statistics
 
     def __call__(self, sample):
         img = copy.copy(reshape_as_image(sample.get("img")))
-        img = np.moveaxis((img - self.statistics.channel_means) / self.statistics.channel_std, -1, 0)
+
+        if img.shape[0] == 12:  # channels first
+            img = np.moveaxis(img, 0, -1)
+        img = np.moveaxis((img - self.statistics.channel_means) /
+                          self.statistics.channel_std, -1, 0)
 
         if sample.get("no2") is not None:
             no2 = copy.copy(sample.get("no2"))
@@ -129,10 +137,11 @@ class Normalize(object):
 
         if sample.get("s5p") is not None:
             s5p = copy.copy(sample.get("s5p"))
-            s5p = np.array((s5p - self.statistics.s5p_mean) / self.statistics.s5p_std)
+            s5p = np.array((s5p - self.statistics.s5p_mean) /
+                           self.statistics.s5p_std)
 
         out = {}
-        for k,v in sample.items():
+        for k, v in sample.items():
             if k == "img":
                 out[k] = img
             elif k == "no2":
@@ -148,6 +157,7 @@ class Normalize(object):
     def undo_no2_standardization(statistics, no2):
         return (no2 * statistics.no2_std) + statistics.no2_mean
 
+
 class Randomize():
     def __call__(self, sample):
         img = copy.copy(sample.get("img"))
@@ -159,16 +169,19 @@ class Randomize():
 
         if random.random() > 0.5:
             img = np.flip(img, 1)
-            if s5p_available: s5p = np.flip(s5p, 0)
+            if s5p_available:
+                s5p = np.flip(s5p, 0)
         if random.random() > 0.5:
             img = np.flip(img, 2)
-            if s5p_available: s5p = np.flip(s5p, 1)
+            if s5p_available:
+                s5p = np.flip(s5p, 1)
         if random.random() > 0.5:
-            img = np.rot90(img, np.random.randint(0, 4), axes=(1,2))
-            if s5p_available: s5p = np.rot90(s5p, np.random.randint(0, 4), axes=(0,1))
+            img = np.rot90(img, np.random.randint(0, 4), axes=(1, 2))
+            if s5p_available:
+                s5p = np.rot90(s5p, np.random.randint(0, 4), axes=(0, 1))
 
         out = {}
-        for k,v in sample.items():
+        for k, v in sample.items():
             if k == "img":
                 out[k] = img
             elif k == "s5p":
@@ -177,4 +190,3 @@ class Randomize():
                 out[k] = v
 
         return out
-
