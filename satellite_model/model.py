@@ -81,7 +81,7 @@ def get_S2S5P_no2_model(device, checkpoint=None, dropout=None, heteroscedastic=F
         head = Head(2048+128+2, 544, dropout, heteroscedastic)
         head.turn_dropout_on()
     else:
-        head = nn.Sequential(nn.Linear(2048+128, 544),
+        head = nn.Sequential(nn.Linear(2048+128+2, 544),
                              nn.ReLU(), nn.Linear(544, 1))
 
     regression_model = MultiBackboneRegressionHead(
