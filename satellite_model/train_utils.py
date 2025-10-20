@@ -96,8 +96,9 @@ def train(sources, model, loss, optimizer, scheduler, dataloader, epochs, device
             for idx, sample in enumerate(dataloader):
                 img = sample["img"].float().to(device)
                 s5p = sample["s5p"].float().unsqueeze(dim=1).to(device)
-                y = sample["no2"].float().to(device)
-                model_input = {"img": img, "s5p": s5p}
+                hour = sample["hour"].float().to(device)
+                y = sample["no2"].float().to(device).squeeze()
+                model_input = {"img": img, "s5p": s5p, "hour": hour}
                 y_hat = model(model_input).squeeze()
                 loss_epoch = loss(y_hat, y)
                 loss_epoch += loss_epoch.item()
