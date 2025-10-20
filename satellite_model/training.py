@@ -191,7 +191,6 @@ for run in tqdm(range(1, config.runs+1), unit="run"):
                 if "S5P" in sources:
                     s5p = sample["s5p"].float().unsqueeze(dim=1).to(device)
                     hour = sample["hour"].float().to(device)
-                    print(hour)
                     model_input = {"img": model_input,
                                    "s5p": s5p, "hour": hour}
                 y = sample["no2"].float().to(device)
