@@ -77,7 +77,8 @@ def get_S2S5P_no2_model(device, checkpoint=None, dropout=None, heteroscedastic=F
     if dropout is not None:
         # add dropout to linear layers of regression head
         # head = nn.Sequential(nn.Dropout(dropout["p_second_to_last_layer"]), nn.Linear(2048+128, 544), nn.ReLU(), nn.Dropout(dropout["p_last_layer"]), nn.Linear(544, 1))
-        head = Head(2048+128, 544, dropout, heteroscedastic)
+        # adding 2 for hour input
+        head = Head(2048+128+2, 544, dropout, heteroscedastic)
         head.turn_dropout_on()
     else:
         head = nn.Sequential(nn.Linear(2048+128, 544),
