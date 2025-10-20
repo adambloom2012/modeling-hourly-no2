@@ -195,7 +195,19 @@ def load_data(datadir, samples_file, frequency, sources):
                         time_idx = time_idx.item()
                         sample["s5p"] = s5p_data.isel(
                             time=time_idx).tropospheric_NO2_column_number_density.values.squeeze()
-                        # if there are any NaNs in the S5P data, skip this sample
+
+                        hour_str = datestr.split('-')[-1]
+                        # 2. Convert the hour string to an integer
+                        hour = int(hour_str)
+
+                        # 3. Calculate the sin and cos components for the 24-hour cycle
+                        hour_sin = np.sin(2 * np.pi * hour / 24)
+                        hour_cos = np.cos(2 * np.pi * hour / 24)
+
+                        # 4. Store them as a numpy array.
+                        # We use float32 as it's the standard for most models.
+                        sample["hour"] = np.array(
+                            [hour_sin, hour_cos], dtype=np.float32)
                         if np.isnan(sample["s5p"]).any():
                             continue
 

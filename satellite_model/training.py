@@ -190,7 +190,9 @@ for run in tqdm(range(1, config.runs+1), unit="run"):
                 model_input = sample["img"].float().to(device)
                 if "S5P" in sources:
                     s5p = sample["s5p"].float().unsqueeze(dim=1).to(device)
-                    model_input = {"img": model_input, "s5p": s5p}
+                    hour = sample["hour"].float().to(device)
+                    model_input = {"img": model_input,
+                                   "s5p": s5p, "hour": hour}
                 y = sample["no2"].float().to(device)
 
                 loss_batch, metric_results = step(
