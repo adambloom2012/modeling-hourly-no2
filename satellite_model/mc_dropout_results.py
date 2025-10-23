@@ -185,12 +185,11 @@ measurements = np.array(measurements)
 predictions = np.array(predictions)
 predictions_dropout = np.array(predictions_dropout)
 variances = np.array(variances)
-stations = np.array(stations)
+# stations = np.array(stations)
 
 
 # save results to dataframe
 results_df = pd.DataFrame({
-    "station" : stations,
     "measurement" : measurements,
     "prediction" : predictions,
     "prediction_dropout" : predictions_dropout,
