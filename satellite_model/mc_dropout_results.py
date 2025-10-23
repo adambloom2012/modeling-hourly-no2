@@ -126,7 +126,7 @@ model.head.turn_dropout_on()
 
 
 model_weights2 = run2 + "artifacts/model_state.model"
-weights = torch.load(model_weights2, map_location=torch.device('cpu'))
+weights = torch.load(model_weights2)
 
 weights["head.fc1.weight"] = weights["head.0.weight"]
 weights["head.fc1.bias"] = weights["head.0.bias"]
