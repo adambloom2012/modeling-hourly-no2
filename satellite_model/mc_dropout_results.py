@@ -39,7 +39,8 @@ os.environ["NUMEXPR_NUM_THREADS"] = "6"  # export NUMEXPR_NUM_THREADS=6
 # load trained dropout model from saved mlflow run
 # /share/atmoschem/abloom/projects/Global-NO2-Estimation/satellite_model/mlruns/169512132705312502/244edd1bdf7741519dd1a9deec94cd4f/params
 # heteroscedastic whole_timespan 0.05, 0.05 0.55 R2
-run = "mlruns/169512132705312502/244edd1bdf7741519dd1a9deec94cd4f/"
+
+run = "mlruns/396141296244906133/0f2007554f01495a9ee06602dbead593/"
 
 samples_file = read_param_file(run + "params/samples_file")
 datadir = read_param_file(run + "params/datadir")
@@ -62,7 +63,7 @@ checkpoint = None  # read_param_file(run + "params/pretrained_checkpoint")
 # run2 = "mlruns/21/4166c84b6ec149998a92459bbe715719/" # no dropout 0.6 r2
 # /share/atmoschem/abloom/projects/Global-NO2-Estimation/satellite_model/mlruns/379969873074757557/8010223d5aa94759a8dc572db53df614/params
 # no dropout 0.6 r2 same model structure as above
-run2 = "mlruns/379969873074757557/8010223d5aa94759a8dc572db53df614/"
+run2 = "mlruns/663281559767123089/eff20df5107741c7aa604cc410b1b894/"
 
 samples_file2 = read_param_file(run2 + "params/samples_file")
 datadir2 = read_param_file(run2 + "params/datadir")
@@ -84,7 +85,7 @@ print(datadir)
 samples, stations = load_data(datadir, samples_file, frequency, sources)
 
 
-test_stations_str = read_param_file(run + "artifacts/stations_val.txt")
+test_stations_str = read_param_file(run + "artifacts/stations_test.txt")
 
 # Parse the string to get actual station IDs
 # Assuming it's a comma-separated string or similar format
@@ -166,7 +167,8 @@ for idx, sample in tqdm(enumerate(dataloader)):
     y_hat2 = model2(model_input).squeeze()
     measurements.append(y.item())
     predictions.append(y_hat2.item())
-    stations.append(sample["AirQualityStation"])
+    # stations.append(sample["AirQualityStation"][0] if isinstance(
+    #     sample["AirQualityStation"], (torch.Tensor, np.ndarray)) else sample["AirQualityStation"])
 
     # copy the sample T times along the batch dimension
     model_input["img"] = torch.cat(T*[model_input["img"]])
@@ -193,9 +195,10 @@ variances = np.array(variances)
 
 # save results to dataframe
 results_df = pd.DataFrame({
+    # "station": stations,
     "measurement": measurements,
     "prediction": predictions,
     "prediction_dropout": predictions_dropout,
     "uncertainty_dropout": variances
 })
-results_df.to_csv("logs/mc_dropout_results_val.csv", index=False)
+results_df.to_csv("logs/mc_dropout_results_test_big.csv", index=False)
