@@ -85,7 +85,7 @@ print(datadir)
 samples, stations = load_data(datadir, samples_file, frequency, sources)
 
 
-test_stations_str = read_param_file(run + "artifacts/stations_test.txt")
+test_stations_str = read_param_file(run + "artifacts/stations_val.txt")
 
 # Parse the string to get actual station IDs
 # Assuming it's a comma-separated string or similar format
@@ -201,4 +201,4 @@ results_df = pd.DataFrame({
     "prediction_dropout": predictions_dropout,
     "uncertainty_dropout": variances
 })
-results_df.to_csv("logs/mc_dropout_results_test_big.csv", index=False)
+results_df.to_csv("logs/mc_dropout_results_val_big.csv", index=False)
