@@ -158,6 +158,25 @@ class Normalize(object):
         return (no2 * statistics.no2_std) + statistics.no2_mean
 
 
+class LogTransformNO2(object):
+    """Apply log(NO2 + 1) transformation for training"""
+
+    def __call__(self, sample):
+        out = {}
+        for k, v in sample.items():
+            if k == "no2":
+                # Apply log(x + 1) transformation
+                out[k] = np.log(v + 1)
+            else:
+                out[k] = v
+        return out
+
+    @staticmethod
+    def inverse_transform(log_no2):
+        """Convert back from log(NO2 + 1) to NO2"""
+        return np.exp(log_no2) - 1
+
+
 class Randomize():
     def __call__(self, sample):
         img = copy.copy(sample.get("img"))

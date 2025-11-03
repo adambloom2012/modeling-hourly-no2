@@ -138,7 +138,7 @@ def train(sources, model, loss, optimizer, scheduler, dataloader, epochs, device
     return model
 
 
-def test(sources, model, dataloader, device, datastats, dropout, heteroscedastic):
+def test(sources, model, dataloader, device, datastats, dropout, heteroscedastic, log_transform=False):
     # test
     model.eval()
     if dropout:
@@ -185,6 +185,14 @@ def test(sources, model, dataloader, device, datastats, dropout, heteroscedastic
 
     measurements = np.array(measurements)
     predictions = np.array(predictions)
+
+    # Convert back from log space if log transform was used
+    if log_transform:
+        from transforms import LogTransformNO2
+        # Model predictions are in log(NO2+1) space, convert back to NO2
+        predictions = LogTransformNO2.inverse_transform(predictions)
+        # Measurements are also in log(NO2+1) space, convert back to NO2
+        measurements = LogTransformNO2.inverse_transform(measurements)
 
     # predictions = Normalize.undo_no2_standardization(datastats, predictions)
     # measurements = Normalize.undo_no2_standardization(datastats, measurements)
@@ -271,7 +279,7 @@ if __name__ == "__main__":
             model = train(sources, model, loss, optimizer,
                           scheduler, dataloader_train, 1, device)
             val_y, val_y_hat = test(
-                sources, model, dataloader_val, device, datastats)
+                sources, model, dataloader_val, device, datastats, False, False)
 
             valid_val = (val_y < 100) & (val_y > 0)
 
@@ -287,9 +295,9 @@ if __name__ == "__main__":
             performances_val.append([run, epoch] + eval_val)
 
         test_y, test_y_hat = test(
-            sources, model, dataloader_test, device, datastats)
+            sources, model, dataloader_test, device, datastats, False, False)
         train_y, train_y_hat = test(
-            sources, model, dataloader_train_for_testing, device, datastats)
+            sources, model, dataloader_train_for_testing, device, datastats, False, False)
 
         valid = (test_y < 100) & (test_y > 0)
         valid_train = (train_y < 100) & (train_y > 0)
