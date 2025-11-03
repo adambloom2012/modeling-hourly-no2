@@ -1,7 +1,7 @@
 from train_utils import eval_metrics, split_samples, train, test
 from utils import load_data, none_or_true, dotdict, set_seed, step, heteroscedastic_loss, PassthroughLoss
 from model import get_model
-from transforms import ChangeBandOrder, ToTensor, DatasetStatistics, Normalize, Randomize
+from transforms import ChangeBandOrder, ToTensor, DatasetStatistics, Normalize, Randomize, LogTransformNO2
 from dataset import NO2PredictionDataset
 from torch.utils.data import DataLoader
 from torchvision import transforms
@@ -30,6 +30,7 @@ os.environ["NUMEXPR_NUM_THREADS"] = "6"  # export NUMEXPR_NUM_THREADS=6
 bool_args = ["verbose",
              "early_stopping",
              "heteroscedastic",
+             "log_transform",
              ]
 
 parser = argparse.ArgumentParser(description='train_s2s5p_model')
@@ -54,6 +55,7 @@ parser.add_argument('--dropout_p_second_to_last_layer',
                     default=0.0, type=float)
 parser.add_argument('--dropout_p_last_layer', default=0.0, type=float)
 parser.add_argument('--heteroscedastic', default="False", type=str)
+parser.add_argument('--log_transform', default="True", type=str)
 
 args = parser.parse_args()
 config = dotdict(
@@ -92,7 +94,11 @@ else:
     loss = nn.MSELoss()
 
 datastats = DatasetStatistics()
-tf = transforms.Compose([Normalize(datastats), Randomize(), ToTensor()])
+transform_list = [Normalize(datastats)]
+if config.log_transform:
+    transform_list.append(LogTransformNO2())
+transform_list.extend([Randomize(), ToTensor()])
+tf = transforms.Compose(transform_list)
 
 performances_test = []
 performances_val = []
@@ -124,6 +130,7 @@ for run in tqdm(range(1, config.runs+1), unit="run"):
         mlflow.log_param("weight_decay", config.weight_decay_lambda)
         mlflow.log_param("epochs", config.epochs)
         mlflow.log_param("seed", seed)
+        mlflow.log_param("log_transform", config.log_transform)
 
         # set the seed for this run
         set_seed(seed)
@@ -212,7 +219,7 @@ for run in tqdm(range(1, config.runs+1), unit="run"):
             loss_history.append(loss_epoch)
 
             val_y, val_y_hat = test(sources, model, dataloader_val,
-                                    device, datastats, config.dropout, config.heteroscedastic)
+                                    device, datastats, config.dropout, config.heteroscedastic, config.log_transform)
 
             valid_val = (val_y_hat < 100) & (val_y_hat > 0)
             eval_val = eval_metrics(val_y, val_y_hat)
@@ -250,9 +257,9 @@ for run in tqdm(range(1, config.runs+1), unit="run"):
                     f.write("%s\n" % station)
 
         test_y, test_y_hat = test(sources, model, dataloader_test,
-                                  device, datastats, config.dropout, config.heteroscedastic)
+                                  device, datastats, config.dropout, config.heteroscedastic, config.log_transform)
         train_y, train_y_hat = test(sources, model, dataloader_train_for_testing,
-                                    device, datastats, config.dropout, config.heteroscedastic)
+                                    device, datastats, config.dropout, config.heteroscedastic, config.log_transform)
 
         valid = (test_y_hat < 100) & (test_y_hat > 0)
         valid_train = (train_y_hat < 100) & (train_y_hat > 0)
