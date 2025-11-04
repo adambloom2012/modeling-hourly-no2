@@ -87,11 +87,11 @@ samples, stations = load_data(
 print("Length of samples =", len(samples))
 print("Number of stations =", len(stations))
 if config.heteroscedastic:
-    msel = nn.MSELoss()
+    msel = nn.L1Loss()
     loss = PassthroughLoss(msel)
-    print("Start heteroscedastic model training with MSELoss")
+    print("Start heteroscedastic model training with L1Loss")
 else:
-    loss = nn.MSELoss()
+    loss = nn.L1Loss()
 
 datastats = DatasetStatistics()
 transform_list = [Normalize(datastats)]
