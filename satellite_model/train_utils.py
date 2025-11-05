@@ -226,7 +226,7 @@ if __name__ == "__main__":
     checkpoint = "checkpoints/pretrained_resnet50_LUC.model"
     # checkpoint = None
 
-    loss = nn.L1Loss()
+    loss = nn.MSELoss()
     epochs = 20
     batch_size = 50
     datastats = DatasetStatistics()
