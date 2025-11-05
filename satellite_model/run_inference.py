@@ -35,7 +35,7 @@ os.environ["MKL_NUM_THREADS"] = "6"  # export MKL_NUM_THREADS=6
 os.environ["VECLIB_MAXIMUM_THREADS"] = "6"  # export VECLIB_MAXIMUM_THREADS=4
 os.environ["NUMEXPR_NUM_THREADS"] = "6"  # export NUMEXPR_NUM_THREADS=6
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-run2 = "mlruns/663281559767123089/eff20df5107741c7aa604cc410b1b894/"
+run2 = "mlruns/379837206754776280/e43fd6a90e444a61abf67ffac5a68b32/"
 
 samples_file2 = read_param_file(run2 + "params/samples_file")
 datadir2 = read_param_file(run2 + "params/datadir")
