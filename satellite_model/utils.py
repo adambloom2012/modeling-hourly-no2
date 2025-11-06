@@ -216,9 +216,12 @@ def load_data(datadir, samples_file, frequency, sources):
                             [month_sin, month_cos], dtype=np.float32)
                         # day should be day of week
                         # Get day of week from the date string
-                        month_str = datestr.split('-')[0]
                         day_str = datestr.split('-')[1]
                         year = 2024
+                        
+                        # Convert day_str to integer
+                        day = int(day_str)
+                        
                         # Create a date object to get day of week
                         date_obj = datetime.strptime(f"{year}-{month:02d}-{day:02d}", "%Y-%m-%d")
                         day_of_week = date_obj.weekday()  # 0=Monday, 6=Sunday
