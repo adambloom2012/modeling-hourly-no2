@@ -159,7 +159,9 @@ T = 100
 for idx, sample in tqdm(enumerate(dataloader)):
     model_input = {"img": sample["img"].float().to(device),
                    "s5p": sample["s5p"].float().unsqueeze(dim=1).to(device),
-                   "hour": sample["hour"].float().to(device)
+                   "hour": sample["hour"].float().to(device),
+                   "day": sample["day"].float().to(device),
+                   "month": sample["month"].float().to(device),
 
                    }
     y = sample["no2"].float().to(device)
@@ -174,6 +176,8 @@ for idx, sample in tqdm(enumerate(dataloader)):
     model_input["img"] = torch.cat(T*[model_input["img"]])
     model_input["s5p"] = torch.cat(T*[model_input["s5p"]])
     model_input["hour"] = torch.cat(T*[model_input["hour"]])
+    model_input["day"] = torch.cat(T*[model_input["day"]])
+    model_input["month"] = torch.cat(T*[model_input["month"]])
 
     y_hat = model(model_input).detach().cpu()
     ym = y_hat[:, 0]

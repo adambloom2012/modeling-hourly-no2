@@ -11,6 +11,7 @@ import pandas as pd
 import numpy as np
 import os
 from re import S
+from datetime import datetime
 
 os.environ["OMP_NUM_THREADS"] = "6"  # export OMP_NUM_THREADS=4
 os.environ["OPENBLAS_NUM_THREADS"] = "6"  # export OPENBLAS_NUM_THREADS=4
@@ -208,6 +209,22 @@ def load_data(datadir, samples_file, frequency, sources):
                         # We use float32 as it's the standard for most models.
                         sample["hour"] = np.array(
                             [hour_sin, hour_cos], dtype=np.float32)
+                        month = int(datestr.split('-')[0])
+                        month_sin = np.sin(2 * np.pi * month / 12)
+                        month_cos = np.cos(2 * np.pi * month / 12)
+                        sample["month"] = np.array(
+                            [month_sin, month_cos], dtype=np.float32)
+                        # day should be day of week
+                        # Get day of week from the date string
+                        month_str = datestr.split('-')[0]
+                        day_str = datestr.split('-')[1]
+                        year = 2024
+                        # Create a date object to get day of week
+                        date_obj = datetime.strptime(f"{year}-{month:02d}-{day:02d}", "%Y-%m-%d")
+                        day_of_week = date_obj.weekday()  # 0=Monday, 6=Sunday
+                        day_sin = np.sin(2 * np.pi * day_of_week / 7)
+                        day_cos = np.cos(2 * np.pi * day_of_week / 7)
+                        sample["day"] = np.array([day_sin, day_cos], dtype=np.float32)
                         if np.isnan(sample["s5p"]).any():
                             continue
 

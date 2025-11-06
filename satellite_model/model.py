@@ -78,10 +78,10 @@ def get_S2S5P_no2_model(device, checkpoint=None, dropout=None, heteroscedastic=F
         # add dropout to linear layers of regression head
         # head = nn.Sequential(nn.Dropout(dropout["p_second_to_last_layer"]), nn.Linear(2048+128, 544), nn.ReLU(), nn.Dropout(dropout["p_last_layer"]), nn.Linear(544, 1))
         # adding 2 for hour input
-        head = Head(2048+128+2, 544, dropout, heteroscedastic)
+        head = Head(2048+128+2+2+2, 544, dropout, heteroscedastic)
         head.turn_dropout_on()
     else:
-        head = nn.Sequential(nn.Linear(2048+128+2, 544),
+        head = nn.Sequential(nn.Linear(2048+128+2+2+2, 544),
                              nn.ReLU(), nn.Linear(544, 1))
 
     regression_model = MultiBackboneRegressionHead(
@@ -136,10 +136,12 @@ class MultiBackboneRegressionHead(nn.Module):
         s5p = x.get("s5p")
         img_input = x.get("img")
         hour = x.get("hour")
+        month = x.get("month")
+        day = x.get("day")
 
         img_input = self.backbone_S2(img_input)
         s5p = self.backbone_S5P(s5p)
-        x = torch.cat((img_input, s5p, hour), dim=1)
+        x = torch.cat((img_input, s5p, hour, month, day), dim=1)
         x = self.head(x)
 
         return x
