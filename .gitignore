@@ -7,3 +7,4 @@ satellite_model/artifacts/
 satellite_model/results/
 .python-version
 pyproject.toml
+.venv
