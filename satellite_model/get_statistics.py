@@ -105,12 +105,8 @@ channel_means = (img_sum / img_count).numpy()
 channel_variance = (img_sum_sq / img_count) - (channel_means ** 2)
 channel_std = np.sqrt(np.maximum(channel_variance, 0))
 
-s5p_values = np.array(s5p_values)  # Convert to NumPy array first
-s5p_values = s5p_values[np.isfinite(s5p_values)]
-if len(s5p_values) > 0:
-    # Remove extreme 1% on each end (keep 98% of data)
-    p1, p99 = np.percentile(s5p_values, [1, 99])
-    s5p_values = s5p_values[(s5p_values >= p1) & (s5p_values <= p99)]
+s5p_values = np.array(s5p_values, dtype=np.float64)  # Use float64 for precision
+s5p_values = s5p_values[np.isfinite(s5p_values)]  # Only remove infinities, keep all other values
 no2_values = np.array(no2_values)
 
 print(f"channel_means = np.array({list(channel_means)})")
