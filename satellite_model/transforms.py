@@ -104,8 +104,8 @@ class DatasetStatistics(object):
         # statistics over the whole of Europe from Sentinel-5P products in 2018-2020:
         # l3_mean_europe_2018_2020_005dg.netcdf mean 1.51449095e+15 std 6.93302798e+14
         # l3_mean_europe_large_2018_2020_005dg.netcdf mean 1.23185273e+15 std 7.51052046e+14
-        self.s5p_mean = 5263615565234176
-        self.s5p_std = 7.51052046e+14
+        self.s5p_mean = 5263616031555944.0
+        self.s5p_std = 1.1124981432620656e+16
 
         # values for averages from 2018-2020 per EEA station, across stations
         self.no2_mean = 6.817475318908691
