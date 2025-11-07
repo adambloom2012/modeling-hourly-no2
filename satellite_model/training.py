@@ -177,6 +177,11 @@ for run in tqdm(range(1, config.runs+1), unit="run"):
 
         if config.verbose:
             print("Start training")
+        
+        # Initialize best validation R2 tracking
+        best_val_r2 = -float('inf')
+        best_model_state = None
+        
         # train the model
         for epoch in range(config.epochs):
             model.train()
@@ -242,16 +247,35 @@ for run in tqdm(range(1, config.runs+1), unit="run"):
 
             if config.verbose:
                 print(f"Epoch: {epoch}, {eval_val}")
+            
+            # Check if this is the best validation R2 so far
+            current_val_r2 = eval_val[0]
+            if current_val_r2 > best_val_r2:
+                best_val_r2 = current_val_r2
+                best_model_state = copy.deepcopy(model.state_dict())
+                if config.verbose:
+                    print(f"New best validation R2: {best_val_r2:.4f} at epoch {epoch}")
+            
             performances_val.append([run, epoch] + eval_val)
             mlflow.log_metrics(
                 {"val_r2_epoch": eval_val[0], "val_mae_epoch": eval_val[1], "val_mse_epoch": eval_val[2]}, step=epoch)
             mlflow.log_metrics({"train_loss_epoch": loss_epoch, "train_r2_epoch": r2_train_epoch,
                                "train_mae_epoch": mae_train_epoch, "train_mse_epoch": mse_train_epoch}, step=epoch)
             mlflow.log_metric("current_epoch", epoch, step=epoch)
+            mlflow.log_metric("best_val_r2", best_val_r2, step=epoch)
 
+        # Load the best model state before saving and evaluation
+        if best_model_state is not None:
+            model.load_state_dict(best_model_state)
+            if config.verbose:
+                print(f"Loaded best model with validation R2: {best_val_r2:.4f}")
+        
         torch.save(model.state_dict(), "artifacts/model_state.model")
         # save the model definition along with the trained model
         os.system("cp model.py artifacts/model.py")
+        
+        # Log the best validation R2 as a final metric
+        mlflow.log_metric("final_best_val_r2", best_val_r2)
         for name, station_list in [("stations_train", stations_train), ("stations_val", stations_val), ("stations_test", stations_test)]:
             # save the dataset train/val/test split
             with open("artifacts/" + name + ".txt", "w") as f:
@@ -317,7 +341,7 @@ performances_train.to_csv(os.path.join(config.result_dir, "_".join([sources, str
 performances_val.to_csv(os.path.join(config.result_dir, "_".join([sources, str(
     checkpoint_name), frequency, "val", str(config.epochs), "epochs"]) + ".csv"), index=False)
 
-# save the model
+# save the model (this will be the best model since we loaded best_model_state above)
 if config.verbose:
     print("Writing model...")
 torch.save(model.state_dict(), os.path.join(config.result_dir, "_".join(
