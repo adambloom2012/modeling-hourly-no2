@@ -35,7 +35,7 @@ os.environ["MKL_NUM_THREADS"] = "6"  # export MKL_NUM_THREADS=6
 os.environ["VECLIB_MAXIMUM_THREADS"] = "6"  # export VECLIB_MAXIMUM_THREADS=4
 os.environ["NUMEXPR_NUM_THREADS"] = "6"  # export NUMEXPR_NUM_THREADS=6
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-run2 = "mlruns/379837206754776280/e43fd6a90e444a61abf67ffac5a68b32/"
+run2 = "mlruns/772459609649213407/83ee548de3314746952f36e2ce57c5b1/"
 
 samples_file2 = read_param_file(run2 + "params/samples_file")
 datadir2 = read_param_file(run2 + "params/datadir")
@@ -134,10 +134,24 @@ print(f"RMSE: {rmse:.4f}")
 print(f"Log Transform Used: {log_transform2}")
 print(f"Heteroscedastic Model: {heteroscedastic2}")
 
+station_names = []
+for i, sample in enumerate(samples):
+    station = sample["AirQualityStation"]
+    # Handle if station is a tensor
+    if torch.is_tensor(station):
+        station = station.item() if station.numel() == 1 else str(
+            station.detach().cpu().numpy())
+    # Handle if station is a numpy array
+    elif isinstance(station, np.ndarray):
+        station = station.item() if station.size == 1 else str(station)
+    # Convert to string just in case
+    station_names.append(str(station))
+
 # save results to dataframe
 results_df = pd.DataFrame({
     "measurement": measurements,
     "prediction": predictions,
+    "station": station_names,
 })
 
 # Save results
