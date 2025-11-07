@@ -155,7 +155,7 @@ results_df = pd.DataFrame({
 })
 
 # Save results
-output_file = "logs/inference_results_log_transform.csv"
+output_file = "logs/inference_results_best_run.csv"
 results_df.to_csv(output_file, index=False)
 print(f"\nResults saved to: {output_file}")
 
