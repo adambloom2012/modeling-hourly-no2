@@ -40,7 +40,8 @@ os.environ["NUMEXPR_NUM_THREADS"] = "6"  # export NUMEXPR_NUM_THREADS=6
 # /share/atmoschem/abloom/projects/Global-NO2-Estimation/satellite_model/mlruns/169512132705312502/244edd1bdf7741519dd1a9deec94cd4f/params
 # heteroscedastic whole_timespan 0.05, 0.05 0.55 R2
 
-run = "mlruns/772459609649213407/83ee548de3314746952f36e2ce57c5b1/"
+run = "mlruns/204089221811416017/7084684952c44d8fb015e99d71158784/"
+
 samples_file = read_param_file(run + "params/samples_file")
 datadir = read_param_file(run + "params/datadir")
 verbose = True
@@ -62,8 +63,7 @@ checkpoint = None  # read_param_file(run + "params/pretrained_checkpoint")
 # run2 = "mlruns/21/4166c84b6ec149998a92459bbe715719/" # no dropout 0.6 r2
 # /share/atmoschem/abloom/projects/Global-NO2-Estimation/satellite_model/mlruns/379969873074757557/8010223d5aa94759a8dc572db53df614/params
 # no dropout 0.6 r2 same model structure as above
-run2 = "mlruns/663281559767123089/eff20df5107741c7aa604cc410b1b894/"
-
+run2 = "mlruns/772459609649213407/83ee548de3314746952f36e2ce57c5b1/"
 samples_file2 = read_param_file(run2 + "params/samples_file")
 datadir2 = read_param_file(run2 + "params/datadir")
 sources2 = read_param_file(run2 + "params/sources")
@@ -128,6 +128,15 @@ model.head.turn_dropout_on()
 model_weights2 = run2 + "artifacts/model_state.model"
 weights = torch.load(model_weights2)
 
+weights["head.fc1.weight"] = weights["head.0.weight"]
+weights["head.fc1.bias"] = weights["head.0.bias"]
+weights["head.fc2.weight"] = weights["head.2.weight"]
+weights["head.fc2.bias"] = weights["head.2.bias"]
+
+del weights["head.0.weight"]
+del weights["head.0.bias"]
+del weights["head.2.weight"]
+del weights["head.2.bias"]
 
 model2 = model_package2.get_model(
     sources2, device, checkpoint=checkpoint, dropout=dropout_config2)
