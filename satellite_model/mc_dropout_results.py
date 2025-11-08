@@ -84,7 +84,7 @@ print(datadir)
 samples, stations = load_data(datadir, samples_file, frequency, sources)
 
 
-test_stations_str = read_param_file(run + "artifacts/stations_val.txt")
+test_stations_str = read_param_file(run + "artifacts/stations_test.txt")
 
 # Parse the string to get actual station IDs
 # Assuming it's a comma-separated string or similar format
