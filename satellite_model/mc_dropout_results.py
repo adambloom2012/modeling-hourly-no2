@@ -183,8 +183,25 @@ measurements = np.array(measurements)
 predictions = np.array(predictions)
 predictions_dropout = np.array(predictions_dropout)
 variances = np.array(variances)
-stations = np.array(stations)
+stations_clean = []
+for station in stations:
+    if torch.is_tensor(station):
+        station_clean = station.item() if station.numel(
+        ) == 1 else str(station.detach().cpu().numpy())
+    elif isinstance(station, (list, np.ndarray)):
+        station_clean = station[0] if len(station) > 0 else "unknown"
+    else:
+        station_clean = str(station)
+    stations_clean.append(station_clean)
 
+stations = np.array(stations_clean)
+
+# Debug: Check array shapes before creating DataFrame
+print(f"measurements shape: {measurements.shape}")
+print(f"predictions shape: {predictions.shape}")
+print(f"predictions_dropout shape: {predictions_dropout.shape}")
+print(f"variances shape: {variances.shape}")
+print(f"stations shape: {stations.shape}")
 
 # save results to dataframe
 results_df = pd.DataFrame({
