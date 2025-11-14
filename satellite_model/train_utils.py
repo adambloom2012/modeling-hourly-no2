@@ -99,8 +99,10 @@ def train(sources, model, loss, optimizer, scheduler, dataloader, epochs, device
                 hour = sample["hour"].float().to(device)
                 day = sample["day"].float().to(device)
                 month = sample["month"].float().to(device)
+                population_density = sample["PopulationDensity"].float().to(device)
+                location_type = sample["LocationType"].float().to(device)
                 y = sample["no2"].float().to(device).squeeze()
-                model_input = {"img": img, "s5p": s5p, "hour": hour, "day": day, "month": month}
+                model_input = {"img": img, "s5p": s5p, "hour": hour, "day": day, "month": month, "PopulationDensity": population_density, "LocationType": location_type}
                 y_hat = model(model_input).squeeze()
                 loss_epoch = loss(y_hat, y)
                 loss_epoch += loss_epoch.item()
@@ -156,8 +158,10 @@ def test(sources, model, dataloader, device, datastats, dropout, heteroscedastic
                 hour = sample["hour"].float().to(device)
                 month = sample["month"].float().to(device)
                 day = sample["day"].float().to(device)
+                population_density = sample["PopulationDensity"].float().to(device)
+                location_type = sample["LocationType"].float().to(device)
                 y = sample["no2"].float().to(device).squeeze()
-                model_input = {"img": img, "s5p": s5p, "hour": hour, "day": day, "month": month}
+                model_input = {"img": img, "s5p": s5p, "hour": hour, "day": day, "month": month, "PopulationDensity": population_density, "LocationType": location_type}
                 y_hat = model(model_input).squeeze()
 
                 if heteroscedastic:
