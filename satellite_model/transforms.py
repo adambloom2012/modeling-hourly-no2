@@ -97,23 +97,19 @@ class ToTensor(object):
 
 class DatasetStatistics(object):
     def __init__(self):
-        self.channel_means = np.array([340.76769064, 429.9430203, 614.21682446,
-                                       590.23569706, 950.68368468, 1792.46290469, 2075.46795189, 2218.94553375,
-                                       2266.46036911, 2246.0605464, 1594.42694882, 1009.32729131])
+        self.channel_means = np.array([1648.2152, 1800.7183, 2007.9602, 2141.0327, 2411.6934, 2834.076, 3006.8687, 3142.7512, 3166.1133, 3183.226, 3073.6143, 2582.8882])
 
-        self.channel_std = np.array([554.81258967, 572.41639287, 582.87945694,
-                                     675.88746967, 729.89827633, 1096.01480586, 1273.45393088, 1365.45589904,
-                                     1356.13789355, 1302.3292881, 1079.19066363, 818.86747235])
+        self.channel_std = np.array([662.9306, 837.3406, 865.3376, 953.4862, 898.1061, 875.4351, 902.4029, 1003.1600, 922.4142, 815.4863, 859.4661, 769.3292])
 
         # statistics over the whole of Europe from Sentinel-5P products in 2018-2020:
         # l3_mean_europe_2018_2020_005dg.netcdf mean 1.51449095e+15 std 6.93302798e+14
         # l3_mean_europe_large_2018_2020_005dg.netcdf mean 1.23185273e+15 std 7.51052046e+14
-        self.s5p_mean = 1.23185273e+15
-        self.s5p_std = 7.51052046e+14
+        self.s5p_mean = 5263616031555944.0
+        self.s5p_std = 1.1124981432620656e+16
 
         # values for averages from 2018-2020 per EEA station, across stations
-        self.no2_mean = 20.95862054085057
-        self.no2_std = 11.641219387279973
+        self.no2_mean = 6.817475318908691
+        self.no2_std = 7.417215824127197
 
 
 class Normalize(object):
@@ -156,6 +152,25 @@ class Normalize(object):
     @staticmethod
     def undo_no2_standardization(statistics, no2):
         return (no2 * statistics.no2_std) + statistics.no2_mean
+
+
+class LogTransformNO2(object):
+    """Apply log(NO2 + 1) transformation for training"""
+
+    def __call__(self, sample):
+        out = {}
+        for k, v in sample.items():
+            if k == "no2":
+                # Apply log(x + 1) transformation
+                out[k] = np.log(v + 1)
+            else:
+                out[k] = v
+        return out
+
+    @staticmethod
+    def inverse_transform(log_no2):
+        """Convert back from log(NO2 + 1) to NO2"""
+        return np.exp(log_no2) - 1
 
 
 class Randomize():

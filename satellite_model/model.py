@@ -2,6 +2,7 @@ import torch
 from torchvision.models import resnet50
 import torch.nn as nn
 
+
 def get_model(sources, device, checkpoint=None, dropout=None, heteroscedastic=False):
     """ Returns a model suitable for the given sources """
     if sources == "S2":
@@ -9,6 +10,7 @@ def get_model(sources, device, checkpoint=None, dropout=None, heteroscedastic=Fa
 
     elif sources == "S2S5P":
         return get_S2S5P_no2_model(device, checkpoint, dropout, heteroscedastic)
+
 
 def get_S2_no2_model(device, checkpoint=None, dropout=None, heteroscedastic=False):
     """ Returns a ResNet for Sentinel-2 data with a regression head """
@@ -19,11 +21,13 @@ def get_S2_no2_model(device, checkpoint=None, dropout=None, heteroscedastic=Fals
         head = Head(2048, 512, dropout, heteroscedastic)
         head.turn_dropout_on()
     else:
-        head = nn.Sequential(nn.Linear(2048, 512), nn.ReLU(), nn.Linear(512, 1))
+        head = nn.Sequential(nn.Linear(2048, 512),
+                             nn.ReLU(), nn.Linear(512, 1))
 
     regression_model = ResnetRegressionHead(backbone, head)
 
     return regression_model
+
 
 class Head(nn.Module):
     def __init__(self, input_dim, intermediate_dim, dropout_config, heteroscedastic):
@@ -40,10 +44,12 @@ class Head(nn.Module):
         self.dropout_on = True
 
     def forward(self, x):
-        x = nn.functional.dropout(x, p=self.dropout1_p, training=self.dropout_on)
+        x = nn.functional.dropout(
+            x, p=self.dropout1_p, training=self.dropout_on)
         x = self.fc1(x)
         x = self.relu(x)
-        x = nn.functional.dropout(x, p=self.dropout2_p, training=self.dropout_on)
+        x = nn.functional.dropout(
+            x, p=self.dropout2_p, training=self.dropout_on)
         x = self.fc2(x)
 
         return x
@@ -60,25 +66,29 @@ def get_S2S5P_no2_model(device, checkpoint=None, dropout=None, heteroscedastic=F
     backbone_S2.fc = nn.Identity()
 
     backbone_S5P = nn.Sequential(nn.Conv2d(1, 10, 3),
-                              nn.ReLU(),
-                              nn.MaxPool2d(3),
-                              nn.Conv2d(10, 15, 5),
-                              nn.ReLU(),
-                              nn.MaxPool2d(3),
-                              nn.Flatten(),
-                              nn.Linear(1815, 128),
-                             )
+                                 nn.ReLU(),
+                                 nn.MaxPool2d(3),
+                                 nn.Conv2d(10, 15, 5),
+                                 nn.ReLU(),
+                                 nn.MaxPool2d(3),
+                                 nn.Flatten(),
+                                 nn.Linear(1815, 128),
+                                 )
     if dropout is not None:
         # add dropout to linear layers of regression head
-        #head = nn.Sequential(nn.Dropout(dropout["p_second_to_last_layer"]), nn.Linear(2048+128, 544), nn.ReLU(), nn.Dropout(dropout["p_last_layer"]), nn.Linear(544, 1))
-        head = Head(2048+128, 544, dropout, heteroscedastic)
+        # head = nn.Sequential(nn.Dropout(dropout["p_second_to_last_layer"]), nn.Linear(2048+128, 544), nn.ReLU(), nn.Dropout(dropout["p_last_layer"]), nn.Linear(544, 1))
+        # adding 2 for hour input
+        head = Head(2048+128+2+2+2, 544, dropout, heteroscedastic)
         head.turn_dropout_on()
     else:
-        head = nn.Sequential(nn.Linear(2048+128, 544), nn.ReLU(), nn.Linear(544, 1))
+        head = nn.Sequential(nn.Linear(2048+128+2+2+2, 544),
+                             nn.ReLU(), nn.Linear(544, 1))
 
-    regression_model = MultiBackboneRegressionHead(backbone_S2, backbone_S5P, head)
+    regression_model = MultiBackboneRegressionHead(
+        backbone_S2, backbone_S5P, head)
 
     return regression_model
+
 
 def get_resnet_model(device, checkpoint=None):
     """
@@ -86,16 +96,19 @@ def get_resnet_model(device, checkpoint=None):
     and pass it to the device
     """
     model = resnet50(pretrained=False, num_classes=19)
-    model.conv1 = torch.nn.Conv2d(12, 64, kernel_size=(3,3), stride=(2,2), padding=(3,3), bias=False)
+    model.conv1 = torch.nn.Conv2d(12, 64, kernel_size=(
+        3, 3), stride=(2, 2), padding=(3, 3), bias=False)
     model.to(device)
     if checkpoint is not None:
         model.load_state_dict(torch.load(checkpoint, map_location=device))
 
     return model
 
+
 class ResnetRegressionHead(nn.Module):
     """ Wrapper class to put a regression head on
     a resnet model """
+
     def __init__(self, backbone, head):
         super(ResnetRegressionHead, self).__init__()
         self.backbone = backbone
@@ -107,9 +120,11 @@ class ResnetRegressionHead(nn.Module):
 
         return x
 
+
 class MultiBackboneRegressionHead(nn.Module):
     """ Wrapper class that combines features extracted
     from two inputs (S2 and S5P) with a regression head """
+
     def __init__(self, backbone_S2, backbone_S5P, head):
         super(MultiBackboneRegressionHead, self).__init__()
         self.backbone_S2 = backbone_S2
@@ -119,11 +134,14 @@ class MultiBackboneRegressionHead(nn.Module):
 
     def forward(self, x):
         s5p = x.get("s5p")
-        x = x.get("img")
+        img_input = x.get("img")
+        hour = x.get("hour")
+        month = x.get("month")
+        day = x.get("day")
 
-        x = self.backbone_S2(x)
+        img_input = self.backbone_S2(img_input)
         s5p = self.backbone_S5P(s5p)
-        x = torch.cat((x, s5p), dim=1)
+        x = torch.cat((img_input, s5p, hour, month, day), dim=1)
         x = self.head(x)
 
         return x
