@@ -153,6 +153,8 @@ class Normalize(object):
                 out[k] = no2
             elif k == "s5p":
                 out[k] = s5p
+            elif k == "PopulationDensity":
+                out[k] = pop_density
             else:
                 out[k] = v
 
