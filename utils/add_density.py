@@ -37,3 +37,35 @@ merged_df['LocationType'] = merged_df['LocationType'].astype('category').cat.cod
 merged_df[merged_df['PopulationDensity'].isnull()]
 # get distinct AirQualityStation where PopulationDensity is null
 len(merged_df[merged_df['PopulationDensity'].isnull()]['AqsSiteCode'].unique())
+
+# single comma seperated string of ids
+','.join([str(x).zfill(9) if len(str(x)) == 8 else str(x) for x in merged_df[merged_df['PopulationDensity'].isnull()]['AqsSiteCode'].unique()])
+missing = [
+'110010041,'
+'110010043,'
+'110010050,'
+'110010051,'
+'261630101,'
+'260810023,'
+'371190050,'
+'480290052,'
+'490190007,'
+'490353018,'
+'490030005,'
+'560330007,'
+'060190011,'
+'060670012,'
+'060731025,'
+'081230015,'
+'080690015'
+]
+
+other_list = pd.read_csv('/home/abloom/data/other_list.csv')
+
+# get otherlist where 'AQS Site ID' is in missing
+other_list[other_list['AQS Site ID'].isin(missing)]
+
+# drop nulls from merged_df
+merged_df = merged_df[~merged_df['PopulationDensity'].isnull()]
+
+merged_df.to_csv('/home/abloom/projects/Global-NO2-Estimation/data/samples_S2S5P_hourly_data_with_pop_density.csv', index=False)
