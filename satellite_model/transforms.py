@@ -111,6 +111,10 @@ class DatasetStatistics(object):
         self.no2_mean = 6.817475318908691
         self.no2_std = 7.417215824127197
 
+        # population density statistics (calculated from training data)
+        self.pop_density_mean = 3583.941852919971  # Replace with actual mean
+        self.pop_density_std = 4968.747582445441    # Replace with actual std
+
 
 class Normalize(object):
     """normalize a sample, i.e. the image and NO2 value, by subtracting mean and dividing by std"""
@@ -135,6 +139,11 @@ class Normalize(object):
             s5p = copy.copy(sample.get("s5p"))
             s5p = np.array((s5p - self.statistics.s5p_mean) /
                            self.statistics.s5p_std)
+        
+        if sample.get("PopulationDensity") is not None:
+            pop_density = copy.copy(sample.get("PopulationDensity"))
+            pop_density = np.array((pop_density - self.statistics.pop_density_mean) /
+                                   self.statistics.pop_density_std)
 
         out = {}
         for k, v in sample.items():
