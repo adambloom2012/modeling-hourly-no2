@@ -40,7 +40,7 @@ os.environ["NUMEXPR_NUM_THREADS"] = "6"  # export NUMEXPR_NUM_THREADS=6
 # /share/atmoschem/abloom/projects/Global-NO2-Estimation/satellite_model/mlruns/169512132705312502/244edd1bdf7741519dd1a9deec94cd4f/params
 # heteroscedastic whole_timespan 0.05, 0.05 0.55 R2
 
-run = "mlruns/204089221811416017/7084684952c44d8fb015e99d71158784/"
+run = "mlruns/997594714772082027/bb9bcc43d2924390bf10092954ed8488/"
 
 samples_file = read_param_file(run + "params/samples_file")
 datadir = read_param_file(run + "params/datadir")
@@ -63,7 +63,7 @@ checkpoint = None  # read_param_file(run + "params/pretrained_checkpoint")
 # run2 = "mlruns/21/4166c84b6ec149998a92459bbe715719/" # no dropout 0.6 r2
 # /share/atmoschem/abloom/projects/Global-NO2-Estimation/satellite_model/mlruns/379969873074757557/8010223d5aa94759a8dc572db53df614/params
 # no dropout 0.6 r2 same model structure as above
-run2 = "mlruns/772459609649213407/83ee548de3314746952f36e2ce57c5b1/"
+run2 = "mlruns/361656335855696102/497afdfb248b4abe9e8c2bcb4f1f3292/"
 samples_file2 = read_param_file(run2 + "params/samples_file")
 datadir2 = read_param_file(run2 + "params/datadir")
 sources2 = read_param_file(run2 + "params/sources")
@@ -151,6 +151,8 @@ for idx, sample in tqdm(enumerate(dataloader)):
                    "hour": sample["hour"].float().to(device),
                    "day": sample["day"].float().to(device),
                    "month": sample["month"].float().to(device),
+                   "PopulationDensity": sample["PopulationDensity"].float().to(device),
+                     "LocationType": sample["LocationType"].float().to(device)
 
                    }
     y = sample["no2"].float().to(device)
@@ -167,6 +169,8 @@ for idx, sample in tqdm(enumerate(dataloader)):
     model_input["hour"] = torch.cat(T*[model_input["hour"]])
     model_input["day"] = torch.cat(T*[model_input["day"]])
     model_input["month"] = torch.cat(T*[model_input["month"]])
+    model_input["PopulationDensity"] = torch.cat(T*[model_input["PopulationDensity"]])
+    model_input["LocationType"] = torch.cat(T*[model_input["LocationType"]])
 
     y_hat = model(model_input).detach().cpu()
     ym = y_hat[:, 0]
@@ -211,4 +215,4 @@ results_df = pd.DataFrame({
     "prediction_dropout": predictions_dropout,
     "uncertainty_dropout": variances
 })
-results_df.to_csv("logs/mc_dropout_results_up_up_and_away.csv", index=False)
+results_df.to_csv("logs/mc_dropout_results_final_results.csv", index=False)
