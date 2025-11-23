@@ -138,12 +138,16 @@ model2.eval()
 "loaded"
 # model.head.turn_dropout_on()
 
-
 measurements = []
 predictions = []
 predictions_dropout = []
 variances = []
 stations = []
+hours = []
+day = []
+months = []
+population_densities = []
+location_types = []
 T = 100
 for idx, sample in tqdm(enumerate(dataloader)):
     model_input = {"img": sample["img"].float().to(device),
@@ -152,7 +156,7 @@ for idx, sample in tqdm(enumerate(dataloader)):
                    "day": sample["day"].float().to(device),
                    "month": sample["month"].float().to(device),
                    "PopulationDensity": sample["PopulationDensity"].float().to(device),
-                     "LocationType": sample["LocationType"].float().to(device)
+                   "LocationType": sample["LocationType"].float().to(device)
 
                    }
     y = sample["no2"].float().to(device)
@@ -163,13 +167,21 @@ for idx, sample in tqdm(enumerate(dataloader)):
     stations.append(sample["AirQualityStation"][0] if isinstance(
         sample["AirQualityStation"], (torch.Tensor, np.ndarray)) else sample["AirQualityStation"])
 
+    # Append temporal and location features
+    hours.append(sample["hour"].item())
+    day.append(sample["day"].item())
+    months.append(sample["month"].item())
+    population_densities.append(sample["PopulationDensity"].item())
+    location_types.append(sample["LocationType"].item())
+
     # copy the sample T times along the batch dimension
     model_input["img"] = torch.cat(T*[model_input["img"]])
     model_input["s5p"] = torch.cat(T*[model_input["s5p"]])
     model_input["hour"] = torch.cat(T*[model_input["hour"]])
     model_input["day"] = torch.cat(T*[model_input["day"]])
     model_input["month"] = torch.cat(T*[model_input["month"]])
-    model_input["PopulationDensity"] = torch.cat(T*[model_input["PopulationDensity"]])
+    model_input["PopulationDensity"] = torch.cat(
+        T*[model_input["PopulationDensity"]])
     model_input["LocationType"] = torch.cat(T*[model_input["LocationType"]])
 
     y_hat = model(model_input).detach().cpu()
@@ -187,6 +199,11 @@ measurements = np.array(measurements)
 predictions = np.array(predictions)
 predictions_dropout = np.array(predictions_dropout)
 variances = np.array(variances)
+hours = np.array(hours)
+day = np.array(day)
+months = np.array(months)
+population_densities = np.array(population_densities)
+location_types = np.array(location_types)
 stations_clean = []
 for station in stations:
     if torch.is_tensor(station):
@@ -206,6 +223,11 @@ print(f"predictions shape: {predictions.shape}")
 print(f"predictions_dropout shape: {predictions_dropout.shape}")
 print(f"variances shape: {variances.shape}")
 print(f"stations shape: {stations.shape}")
+print(f"hours shape: {hours.shape}")
+print(f"day shape: {day.shape}")
+print(f"months shape: {months.shape}")
+print(f"population_densities shape: {population_densities.shape}")
+print(f"location_types shape: {location_types.shape}")
 
 # save results to dataframe
 results_df = pd.DataFrame({
@@ -213,6 +235,11 @@ results_df = pd.DataFrame({
     "measurement": measurements,
     "prediction": predictions,
     "prediction_dropout": predictions_dropout,
-    "uncertainty_dropout": variances
+    "uncertainty_dropout": variances,
+    "hour": hours,
+    "day": day,
+    "month": months,
+    "population_density": population_densities,
+    "location_type": location_types
 })
 results_df.to_csv("logs/mc_dropout_results_final_results.csv", index=False)
