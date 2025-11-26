@@ -205,8 +205,10 @@ for run in tqdm(range(1, config.runs+1), unit="run"):
                     hour = sample["hour"].float().to(device)
                     day = sample["day"].float().to(device)
                     month = sample["month"].float().to(device)
+                    population_density = sample["PopulationDensity"].float().to(device)
+                    location_type = sample["LocationType"].float().to(device)
                     model_input = {"img": model_input,
-                                   "s5p": s5p, "hour": hour, "day": day, "month": month}
+                                   "s5p": s5p, "hour": hour, "day": day, "month": month, "PopulationDensity": population_density, "LocationType": location_type}
                 y = sample["no2"].float().to(device)
 
                 loss_batch, metric_results = step(

@@ -228,6 +228,17 @@ def load_data(datadir, samples_file, frequency, sources):
                         day_sin = np.sin(2 * np.pi * day_of_week / 7)
                         day_cos = np.cos(2 * np.pi * day_of_week / 7)
                         sample["day"] = np.array([day_sin, day_cos], dtype=np.float32)
+                        
+                        # Population Density as float
+                        sample["PopulationDensity"] = np.array([float(sample["PopulationDensity"])], dtype=np.float32)
+                        
+                        # One-hot encode LocationType (4 categories: 0, 1, 2, 3)
+                        location_type = int(sample["LocationType"])
+                        location_one_hot = np.zeros(4, dtype=np.float32)
+                        if 0 <= location_type < 4:
+                            location_one_hot[location_type] = 1.0
+                        sample["LocationType"] = location_one_hot
+                        
                         if np.isnan(sample["s5p"]).any():
                             continue
 
