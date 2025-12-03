@@ -16,14 +16,27 @@ import pandas as pd
 val_df = pd.read_csv(
     '/Users/adambloom/Downloads/mc_dropout_results_val_big.csv')
 df = pd.read_csv(
-    '/Users/adambloom/Downloads/inference_results_best_run_fina.csv')
-dro_df = pd.read_csv(
-    '/Users/adambloom/Downloads/mc_dropout_results_final_results.csv')
-# exclude top 5% of uncertainty
+    '/Users/adambloom/Downloads/mc_dropout_results_final_results_2.csv')
 
+df.head()
+# an example of date_str column is 1-1-14 (month-day-hour)
+# I want to create df_daily that groups by the day (first two parts of date_str)
+df['day'] = df['date_str'].apply(lambda x: '-'.join(x.split('-')[:2]))
+df.head()
+df_daily = df.groupby(['day', 'station']).agg({
+    'measurement': 'mean',
+    'prediction': 'mean',
+    'prediction_dropout': 'mean',
+    'uncertainty_dropout': 'mean'
+}).reset_index()
+r2_score(df_daily['measurement'], df_daily['prediction'])
+
+# exclude top 5% of uncertainty
+# date_string looks like 1-1-14 (month-day-hour)
+# make split the second - to the end of date_string to create 'day'
 dro_df = dro_df[dro_df['uncertainty_dropout'] <
                 dro_df['uncertainty_dropout'].quantile(0.95)]
-r2_score(dro_df['measurement'], dro_df['prediction_dropout'])
+r2_score(df['measurement'], df['prediction'])
 mean_absolute_error(dro_df['measurement'], dro_df['prediction_dropout'])
 mean_squared_error(dro_df['measurement'], dro_df['prediction_dropout'])
 len(df)
@@ -55,7 +68,7 @@ plt.xlim(0, 40)
 plt.ylim(0, 40)
 plt.xlabel('Measurement (ug/m³)', fontsize=16)
 plt.ylabel('Prediction (ug/m³)', fontsize=16)
-plt.title('Inference for CONUS', fontsize=18)
+plt.title('Hourly Predictions over CONUS', fontsize=18)
 plt.tick_params(axis='both', which='major', labelsize=14)
 # add r2, mae and mse
 slope, intercept, r_value, p_value, std_err = linregress(x, y)
@@ -76,7 +89,7 @@ sns.set_theme(style="whitegrid")
 # Create bins based on uncertainty quantiles
 n_bins = 10
 uncertainty_bins = pd.qcut(
-    dro_df['uncertainty_dropout'], q=n_bins, duplicates='drop')
+    df['uncertainty_dropout'], q=n_bins, duplicates='drop')
 
 # Round bin labels to 3 decimals
 bin_labels = []
@@ -86,11 +99,11 @@ for interval in uncertainty_bins.cat.categories:
     bin_labels.append(f'({left}, {right}]')
 
 uncertainty_bins = uncertainty_bins.cat.rename_categories(bin_labels)
-dro_df['uncertainty_bin'] = uncertainty_bins
+df['uncertainty_bin'] = uncertainty_bins
 
 # Create box plot
-sns.boxplot(data=dro_df, x='uncertainty_bin', y=np.abs(
-    dro_df['measurement'] - dro_df['prediction_dropout']))
+sns.boxplot(data=df, x='uncertainty_bin', y=np.abs(
+    df['measurement'] - df['prediction_dropout']))
 plt.xticks(rotation=45, fontsize=16)
 plt.xlabel('Uncertainty Bins (Dropout)', fontsize=24)
 plt.ylabel('Absolute Error', fontsize=24)
@@ -334,7 +347,7 @@ station_stats.to_csv(
 
 # map regional stats
 all_measures = pd.read_csv(
-    '/opt/projects/Global-NO2-Estimation/data/samples_S2S5P_hourly_data.csv')
+    'data/samples_S2S5P_hourly_data_with_pop_density.csv')
 
 all_measures
 # join lat long on to station_stats
