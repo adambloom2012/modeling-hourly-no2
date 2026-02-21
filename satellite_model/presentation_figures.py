@@ -14,10 +14,10 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import pandas as pd
 
-X_FONTSIZE = 20
-Y_FONTSIZE = 20
+X_FONTSIZE = 22
+Y_FONTSIZE = 22
 TITLE_FONTSIZE = 24
-TICK_FONTSIZE = 16
+TICK_FONTSIZE = 18
 
 # create a df and add header 'station'
 test_stations = pd.read_csv(
@@ -60,7 +60,7 @@ all_stations = pd.concat(
     [test_stations, train_stations, val_stations]).drop_duplicates()
 all_stations
 all_stations = all_stations.merge(
-    site_info[['site_id', 'County Name', 'State Name']], left_on='station', right_on='site_id', how='left')
+    site_info[['site_id', 'County Name', 'State Name', 'Latitude', 'Longitude']], left_on='station', right_on='site_id', how='left')
 all_stations.to_csv('/tmp/stations_with_info.csv')
 # join population data from station_stats on to df
 df = df.merge(
@@ -110,9 +110,9 @@ r2 = 0.37
 mae = 4.20
 mse = 38.37
 stats_text = f'R² = {r2:.2f}\nMAE = {mae:.2f} ug/m³\nMSE = {mse:.2f} (ug/m³)²'
-plt.text(0.05, 0.95, stats_text, transform=plt.gca().transAxes, fontsize=14,
+plt.text(0.05, 0.95, stats_text, transform=plt.gca().transAxes, fontsize=18,
          verticalalignment='top', bbox=dict(boxstyle='round', facecolor='white', alpha=0.5))
-plt.legend(fontsize=14)
+plt.legend(fontsize=18)
 plt.show()
 
 # FIGURE BREAK Daily
@@ -139,9 +139,9 @@ r2 = round(r2_score(x, y), 2)
 mae = round(mean_absolute_error(x, y), 2)
 mse = round(mean_squared_error(x, y), 2)
 stats_text = f'R² = {r2:.2f}\nMAE = {mae:.2f} ug/m³\nMSE = {mse:.2f} (ug/m³)²'
-plt.text(0.05, 0.95, stats_text, transform=plt.gca().transAxes, fontsize=14,
+plt.text(0.05, 0.95, stats_text, transform=plt.gca().transAxes, fontsize=16,
          verticalalignment='top', bbox=dict(boxstyle='round', facecolor='white', alpha=0.5))
-plt.legend(fontsize=14)
+plt.legend(fontsize=16)
 plt.show()
 
 # FIGURE BREAK Monthly
@@ -167,9 +167,9 @@ r2 = round(r2_score(x, y), 2)
 mae = round(mean_absolute_error(x, y), 2)
 mse = round(mean_squared_error(x, y), 2)
 stats_text = f'R² = {r2:.2f}\nMAE = {mae:.2f} ug/m³\nMSE = {mse:.2f} (ug/m³)²'
-plt.text(0.05, 0.95, stats_text, transform=plt.gca().transAxes, fontsize=14,
+plt.text(0.05, 0.95, stats_text, transform=plt.gca().transAxes, fontsize=18,
          verticalalignment='top', bbox=dict(boxstyle='round', facecolor='white', alpha=0.5))
-plt.legend(fontsize=14)
+plt.legend(fontsize=18)
 plt.show()
 
 
@@ -313,7 +313,7 @@ plt.ylim(0, 40)
 plt.xlabel('Measurement (ug/m³)', fontsize=X_FONTSIZE)
 plt.ylabel('Prediction (ug/m³)', fontsize=Y_FONTSIZE)
 plt.title(
-    f'Hourly Predictions over West Coast Region', fontsize=TITLE_FONTSIZE)
+    f'Hourly Predictions over Western Region', fontsize=TITLE_FONTSIZE)
 plt.tick_params(axis='both', which='major', labelsize=TICK_FONTSIZE)
 # add r2, mae and mse
 slope, intercept, r_value, p_value, std_err = linregress(x, y)
@@ -322,16 +322,16 @@ r2 = round(r2_score(x, y), 2)
 mae = round(mean_absolute_error(x, y), 2)
 mse = round(mean_squared_error(x, y), 2)
 stats_text = f'R² = {r2:.2f}\nMAE = {mae:.2f} ug/m³\nMSE = {mse:.2f} (ug/m³)²'
-plt.text(0.05, 0.95, stats_text, transform=plt.gca().transAxes, fontsize=14,
+plt.text(0.05, 0.95, stats_text, transform=plt.gca().transAxes, fontsize=18,
          verticalalignment='top', bbox=dict(boxstyle='round', facecolor='white', alpha=0.5))
-plt.legend(fontsize=14)
+plt.legend(fontsize=18)
 plt.show()
 
 
 # FIGURE BREAK
 
 # local pgres con
-con = create_engine('postgresql://adambloom:@localhost:5432/adambloom')
+con = create_engine('postgresql://adambloom:harp-junction-speaker@127.0.0.1/adambloom')
 query = '''SELECT DISTINCT 
     split_part(date_str, '-', 1)::INT AS month ,
     split_part(date_str, '-', 2)::INT AS day ,
@@ -360,10 +360,10 @@ plt.plot(station_df['time_index'], station_df['prediction'],
          color='#1f77b4', linewidth=2, alpha=0.8, linestyle='--', label='February Prediction')
 
 plt.xlabel('Hours from Start of Week', fontsize=X_FONTSIZE)
-plt.ylabel('NO₂ (ug/m³)', fontsize=Y_FONTSIZE)
+plt.ylabel('NO$_2$ (ug/m³)', fontsize=Y_FONTSIZE)
 plt.title('First Week Pattern - February - Station 4_19_1011',
           fontsize=TITLE_FONTSIZE)
-plt.legend(loc='upper right', fontsize=14)
+plt.legend(loc='upper right', fontsize=18)
 plt.grid(True, alpha=0.3)
 plt.tick_params(axis='both', which='major', labelsize=TICK_FONTSIZE)
 plt.xlim(0, 7*24)  # 7 days * 24 hours
